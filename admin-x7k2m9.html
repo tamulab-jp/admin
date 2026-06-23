@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>tamulab 課金管理</title>
+<style>
+  :root {
+    --navy: #1b2a4a;
+    --navy-soft: #2a3b5e;
+    --ink: #1a1f2e;
+    --muted: #6b7488;
+    --line: #e2e6ee;
+    --bg: #f5f6fa;
+    --card: #ffffff;
+    --free: #6b7488;
+    --paid: #1f8a5b;
+    --paid-bg: #e7f5ee;
+    --off: #b4332b;
+    --off-bg: #fbeae9;
+    --accent: #d98a2b;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", "Hiragino Sans", "Yu Gothic UI", sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+  }
+  header {
+    background: var(--navy);
+    color: #fff;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  header h1 { font-size: 17px; margin: 0; font-weight: 600; letter-spacing: .02em; }
+  header .sub { font-size: 12px; color: #aeb8d0; margin-top: 2px; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 20px 16px 60px; }
+
+  /* login */
+  #loginView { max-width: 380px; margin: 60px auto; padding: 0 16px; }
+  .login-card {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 28px 24px;
+  }
+  .login-card h2 { margin: 0 0 4px; font-size: 18px; }
+  .login-card p { margin: 0 0 20px; font-size: 13px; color: var(--muted); }
+  label { display: block; font-size: 12px; color: var(--muted); margin: 12px 0 5px; font-weight: 600; }
+  input {
+    width: 100%; padding: 10px 12px; font-size: 15px;
+    border: 1px solid var(--line); border-radius: 8px; background: #fff;
+    -webkit-appearance: none;
+  }
+  input:focus { outline: 2px solid var(--navy-soft); outline-offset: -1px; border-color: var(--navy-soft); }
+  button {
+    font-family: inherit; cursor: pointer; border: none; border-radius: 8px;
+    font-weight: 600; transition: filter .12s;
+  }
+  button:active { filter: brightness(.92); }
+  .btn-primary {
+    background: var(--navy); color: #fff; padding: 11px 16px;
+    width: 100%; font-size: 15px; margin-top: 18px;
+  }
+  .btn-ghost {
+    background: transparent; color: #cdd5e6; border: 1px solid #45527a;
+    padding: 7px 14px; font-size: 13px;
+  }
+
+  /* app cards */
+  .app-card {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius); margin-bottom: 14px; overflow: hidden;
+  }
+  .app-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px; gap: 10px; border-bottom: 1px solid var(--line);
+  }
+  .app-name { font-weight: 700; font-size: 15px; }
+  .app-code { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+  .badges { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+  .badge {
+    font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px;
+    white-space: nowrap;
+  }
+  .badge-free { background: #eef0f4; color: var(--free); }
+  .badge-paid { background: var(--paid-bg); color: var(--paid); }
+  .badge-off  { background: var(--off-bg);  color: var(--off); }
+
+  .app-body { padding: 14px 16px; }
+  .grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  }
+  .grid .full { grid-column: 1 / -1; }
+  .field label { margin-top: 0; }
+  .row-actions {
+    display: flex; align-items: center; gap: 10px; margin-top: 14px; flex-wrap: wrap;
+  }
+  .btn-save { background: var(--paid); color: #fff; padding: 9px 18px; font-size: 14px; }
+  .toggle-active {
+    display: inline-flex; align-items: center; gap: 10px; font-size: 14px;
+    color: var(--ink); cursor: pointer; user-select: none; font-weight: 600;
+  }
+  /* スイッチ本体 */
+  .switch { position: relative; display: inline-block; width: 50px; height: 28px; flex: 0 0 auto; }
+  .switch input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+  .switch .track {
+    position: absolute; inset: 0; background: #c8ccd6; border-radius: 999px;
+    transition: background .15s;
+  }
+  .switch .knob {
+    position: absolute; top: 3px; left: 3px; width: 22px; height: 22px;
+    background: #fff; border-radius: 50%; transition: transform .15s;
+    box-shadow: 0 1px 3px rgba(0,0,0,.3);
+  }
+  .switch input:checked + .track { background: var(--paid); }
+  .switch input:checked + .track + .knob { transform: translateX(22px); }
+  .switch input:disabled { cursor: default; }
+  .switch-label { min-width: 64px; }
+  .switch-on  { color: var(--paid); }
+  .switch-off { color: var(--off); }
+  .saved-note { font-size: 12px; color: var(--paid); margin-left: auto; opacity: 0; transition: opacity .2s; }
+  .saved-note.show { opacity: 1; }
+  .saved-note.err { color: var(--off); }
+
+  .updated { font-size: 11px; color: var(--muted); margin-top: 8px; }
+  .quick {
+    display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap;
+  }
+  .chip {
+    background: #f0f2f7; color: var(--navy); border: 1px solid var(--line);
+    font-size: 12px; padding: 5px 11px; border-radius: 20px; font-weight: 600;
+  }
+  .chip:active { background: #e3e7f0; }
+
+  .toast {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--ink); color: #fff; padding: 11px 18px; border-radius: 8px;
+    font-size: 14px; opacity: 0; pointer-events: none; transition: all .25s; z-index: 50;
+    max-width: 90%;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.err { background: var(--off); }
+  .hidden { display: none !important; }
+  .loading { text-align: center; color: var(--muted); padding: 40px 0; font-size: 14px; }
+  .err-box { background: var(--off-bg); color: var(--off); border-radius: 8px; padding: 10px 12px; font-size: 13px; margin-bottom: 14px; }
+</style>
+</head>
+<body>
+
+<!-- ===== ログイン画面 ===== -->
+<div id="loginView">
+  <div class="login-card">
+    <h2>課金管理</h2>
+    <p>tamulab 全アプリのプランをここで切り替えます。</p>
+    <div id="loginErr" class="err-box hidden"></div>
+    <label for="email">メールアドレス</label>
+    <input id="email" type="email" autocomplete="username" placeholder="tamulab.jp@gmail.com">
+    <label for="password">パスワード</label>
+    <input id="password" type="password" autocomplete="current-password" placeholder="••••••••">
+    <button class="btn-primary" id="loginBtn">ログイン</button>
+  </div>
+</div>
+
+<!-- ===== 管理画面 ===== -->
+<div id="adminView" class="hidden">
+  <header>
+    <div>
+      <h1>tamulab 課金管理</h1>
+      <div class="sub" id="whoami"></div>
+    </div>
+    <button class="btn-ghost" id="logoutBtn">ログアウト</button>
+  </header>
+  <div class="wrap">
+    <div id="notAdmin" class="err-box hidden">
+      このアカウントは管理者ではありません。プラン変更はできません(表示のみ)。
+    </div>
+    <div id="appList">
+      <div class="loading">読み込み中…</div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ====== 設定 ======
+const SUPABASE_URL = 'https://hyvjvcdahahrznhujtaz.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5dmp2Y2RhaGFocnpuaHVqdGF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NTE3MDcsImV4cCI6MjA5NTQyNzcwN30.Zdl8yaFH64xEbiEzi7v8dsd2iu3CKaH96TBNqigJZV4';
+const SUPERADMIN_UID = '70e678b4-39db-49cc-a715-1ba5876cb892';
+
+// アプリ表示名
+const APP_NAMES = {
+  dm: 'ドラメモ',
+  pm: 'プロジェクト付箋',
+  tc: 'タイムカードSaaS',
+  tk: '点呼SaaS',
+};
+const APP_ORDER = ['dm', 'pm', 'tc', 'tk'];
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const $ = (id) => document.getElementById(id);
+
+// ====== 起動：既存セッションがあれば管理画面へ ======
+(async function init() {
+  const { data } = await sb.auth.getSession();
+  if (data.session) {
+    showAdmin(data.session.user);
+  }
+})();
+
+// ====== ログイン ======
+$('loginBtn').addEventListener('click', login);
+$('password').addEventListener('keydown', (e) => { if (e.key === 'Enter') login(); });
+
+async function login() {
+  const email = $('email').value.trim();
+  const password = $('password').value;
+  $('loginErr').classList.add('hidden');
+  if (!email || !password) {
+    showLoginErr('メールアドレスとパスワードを入力してください。');
+    return;
+  }
+  $('loginBtn').textContent = 'ログイン中…';
+  $('loginBtn').disabled = true;
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  $('loginBtn').textContent = 'ログイン';
+  $('loginBtn').disabled = false;
+  if (error) {
+    showLoginErr('ログインに失敗しました。メールアドレスかパスワードをご確認ください。');
+    return;
+  }
+  showAdmin(data.user);
+}
+
+function showLoginErr(msg) {
+  $('loginErr').textContent = msg;
+  $('loginErr').classList.remove('hidden');
+}
+
+// ====== ログアウト ======
+$('logoutBtn').addEventListener('click', async () => {
+  await sb.auth.signOut();
+  location.reload();
+});
+
+// ====== 管理画面表示 ======
+async function showAdmin(user) {
+  $('loginView').classList.add('hidden');
+  $('adminView').classList.remove('hidden');
+  $('whoami').textContent = user.email;
+  const isAdmin = (user.id === SUPERADMIN_UID);
+  if (!isAdmin) $('notAdmin').classList.remove('hidden');
+  await loadApps(isAdmin);
+}
+
+// ====== 一覧読み込み ======
+async function loadApps(isAdmin) {
+  const { data, error } = await sb
+    .from('shared_subscription_overview')
+    .select('*');
+  if (error) {
+    $('appList').innerHTML = '<div class="err-box">読み込みに失敗しました：' + esc(error.message) + '</div>';
+    return;
+  }
+  const map = {};
+  data.forEach(r => { map[r.app_code] = r; });
+
+  $('appList').innerHTML = '';
+  APP_ORDER.forEach(code => {
+    const row = map[code];
+    if (!row) return;
+    $('appList').appendChild(buildCard(code, row, isAdmin));
+  });
+}
+
+// ====== カード生成 ======
+function buildCard(code, row, isAdmin) {
+  const card = document.createElement('div');
+  card.className = 'app-card';
+
+  const isPaid = row.plan_code !== 'free';
+  const isActive = row.is_active === true || row.is_active === 'true';
+
+  let badges = '';
+  badges += isActive
+    ? (isPaid ? `<span class="badge badge-paid">有料 (${esc(row.plan_code)})</span>`
+              : `<span class="badge badge-free">無料</span>`)
+    : `<span class="badge badge-off">停止中</span>`;
+
+  card.innerHTML = `
+    <div class="app-head">
+      <div>
+        <div class="app-name">${esc(APP_NAMES[code] || code)}</div>
+        <div class="app-code">${esc(code)}_subscriptions</div>
+      </div>
+      <div class="badges">${badges}</div>
+    </div>
+    <div class="app-body">
+      ${isAdmin ? quickChips(code) : ''}
+      <div class="grid">
+        <div class="field">
+          <label>プラン名</label>
+          <input data-f="plan" value="${esc(row.plan_code ?? '')}" ${isAdmin ? '' : 'disabled'}>
+        </div>
+        <div class="field">
+          <label>料金（円／月）</label>
+          <input data-f="price" type="number" inputmode="numeric" value="${numv(row.current_price)}" ${isAdmin ? '' : 'disabled'}>
+        </div>
+        <div class="field">
+          <label>上限人数</label>
+          <input data-f="max" type="number" inputmode="numeric" value="${numv(row.max_users)}" ${isAdmin ? '' : 'disabled'}>
+        </div>
+        <div class="field">
+          <label>状態</label>
+          <label class="toggle-active">
+            <span class="switch">
+              <input type="checkbox" data-f="active" ${isActive ? 'checked' : ''} ${isAdmin ? '' : 'disabled'}>
+              <span class="track"></span>
+              <span class="knob"></span>
+            </span>
+            <span class="switch-label ${isActive ? 'switch-on' : 'switch-off'}" data-statelabel>${isActive ? '有効' : '停止中'}</span>
+          </label>
+        </div>
+      </div>
+      ${isAdmin ? `
+      <div class="row-actions">
+        <button class="btn-save" data-save="${esc(code)}">保存</button>
+        <span class="saved-note" data-note="${esc(code)}"></span>
+      </div>` : ''}
+      <div class="updated">最終更新：${fmtDate(row.updated_at)}</div>
+    </div>
+  `;
+
+  if (isAdmin) {
+    // 状態トグルのラベルを即時更新
+    const activeInput = card.querySelector('[data-f="active"]');
+    const stateLabel = card.querySelector('[data-statelabel]');
+    activeInput.addEventListener('change', () => {
+      const on = activeInput.checked;
+      stateLabel.textContent = on ? '有効' : '停止中';
+      stateLabel.classList.toggle('switch-on', on);
+      stateLabel.classList.toggle('switch-off', !on);
+    });
+    // クイックチップ
+    card.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const c = card;
+        c.querySelector('[data-f="plan"]').value  = chip.dataset.plan;
+        c.querySelector('[data-f="price"]').value = chip.dataset.price;
+        c.querySelector('[data-f="max"]').value   = chip.dataset.max;
+        activeInput.checked = true;
+        activeInput.dispatchEvent(new Event('change'));
+      });
+    });
+    // 保存
+    card.querySelector('[data-save]').addEventListener('click', () => saveApp(code, card));
+  }
+  return card;
+}
+
+// プリセットのクイックボタン（自由入力欄に値を流し込むだけ）
+function quickChips(code) {
+  return `
+    <div class="quick">
+      <button class="chip" data-plan="free"     data-price="0"    data-max="5">無料に</button>
+      <button class="chip" data-plan="standard" data-price="980"  data-max="50">スタンダード</button>
+      <button class="chip" data-plan="pro"      data-price="2980" data-max="">プロ</button>
+    </div>`;
+}
+
+// ====== 保存（admin_set_plan を呼ぶ） ======
+async function saveApp(code, card) {
+  const plan = card.querySelector('[data-f="plan"]').value.trim();
+  const priceRaw = card.querySelector('[data-f="price"]').value.trim();
+  const maxRaw = card.querySelector('[data-f="max"]').value.trim();
+  const active = card.querySelector('[data-f="active"]').checked;
+  const note = card.querySelector('[data-note]');
+
+  if (!plan) { flashNote(note, 'プラン名を入力してください', true); return; }
+
+  const price = priceRaw === '' ? 0 : Number(priceRaw);
+  const max = maxRaw === '' ? null : Number(maxRaw);
+  if (priceRaw !== '' && isNaN(price)) { flashNote(note, '料金が数値ではありません', true); return; }
+  if (maxRaw !== '' && isNaN(max))     { flashNote(note, '人数が数値ではありません', true); return; }
+
+  const btn = card.querySelector('[data-save]');
+  btn.disabled = true; btn.textContent = '保存中…';
+
+  const { error } = await sb.rpc('admin_set_plan', {
+    p_app: code,
+    p_plan: plan,
+    p_price: price,
+    p_max: max,
+    p_active: active,
+  });
+
+  btn.disabled = false; btn.textContent = '保存';
+
+  if (error) {
+    const msg = /superadmin/.test(error.message)
+      ? '管理者権限がありません'
+      : '保存に失敗：' + error.message;
+    flashNote(note, msg, true);
+    toast(msg, true);
+    return;
+  }
+  flashNote(note, '保存しました');
+  toast(`${APP_NAMES[code]} を更新しました`);
+  // 再読み込みでバッジ等を最新化
+  const { data } = await sb.auth.getSession();
+  await loadApps(data.session && data.session.user.id === SUPERADMIN_UID);
+}
+
+// ====== ユーティリティ ======
+function flashNote(el, msg, isErr) {
+  el.textContent = msg;
+  el.classList.toggle('err', !!isErr);
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 2600);
+}
+let toastT;
+function toast(msg, isErr) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.toggle('err', !!isErr);
+  t.classList.add('show');
+  clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove('show'), 2600);
+}
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => (
+    { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]
+  ));
+}
+function numv(v) { return (v === null || v === undefined || v === '') ? '' : Number(v); }
+function fmtDate(s) {
+  if (!s) return '—';
+  const d = new Date(s);
+  if (isNaN(d)) return esc(s);
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+</script>
+</body>
+</html>
