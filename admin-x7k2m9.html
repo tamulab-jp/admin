@@ -71,6 +71,9 @@
     background: transparent; color: #cdd5e6; border: 1px solid #45527a;
     padding: 7px 14px; font-size: 13px;
   }
+  .head-actions { display: flex; align-items: center; gap: 10px; }
+  .btn-link { color: #fff; background: var(--accent); text-decoration: none; padding: 7px 14px; font-size: 13px; font-weight: 600; border-radius: 8px; white-space: nowrap; }
+  .btn-link:active { filter: brightness(.92); }
 
   /* app cards */
   .app-card {
@@ -174,7 +177,10 @@
       <h1>tamulab 課金管理</h1>
       <div class="sub" id="whoami"></div>
     </div>
-    <button class="btn-ghost" id="logoutBtn">ログアウト</button>
+    <div class="head-actions">
+      <a class="btn-link" href="companies-x7k2m9.html">会社別管理へ →</a>
+      <button class="btn-ghost" id="logoutBtn">ログアウト</button>
+    </div>
   </header>
   <div class="wrap">
     <div id="notAdmin" class="err-box hidden">
