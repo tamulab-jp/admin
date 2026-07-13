@@ -7,62 +7,47 @@
 <title>tamulab ユーザー別課金管理</title>
 <style>
   :root {
-    --navy: #1b2a4a;
-    --navy-soft: #2a3b5e;
-    --ink: #1a1f2e;
-    --muted: #6b7488;
-    --line: #e2e6ee;
-    --bg: #f5f6fa;
-    --card: #ffffff;
-    --active: #1f8a5b;
-    --active-bg: #e7f5ee;
-    --trial: #d98a2b;
-    --trial-bg: #fbf1e3;
-    --expired: #b4332b;
-    --expired-bg: #fbeae9;
-    --accent: #d98a2b;
-    --radius: 10px;
+    --navy: #1b2a4a; --navy-soft: #2a3b5e; --ink: #1a1f2e; --muted: #6b7488;
+    --line: #e2e6ee; --bg: #f5f6fa; --card: #ffffff;
+    --active: #1f8a5b; --active-bg: #e7f5ee;
+    --trial: #d98a2b; --trial-bg: #fbf1e3;
+    --expired: #b4332b; --expired-bg: #fbeae9;
+    --accent: #d98a2b; --radius: 10px;
   }
   * { box-sizing: border-box; }
   body { margin: 0; font-family: -apple-system, "Segoe UI", "Hiragino Sans", "Yu Gothic UI", sans-serif; background: var(--bg); color: var(--ink); line-height: 1.6; }
   header { background: var(--navy); color: #fff; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-  header h1 { font-size: 17px; margin: 0; font-weight: 600; letter-spacing: .02em; }
+  header h1 { font-size: 17px; margin: 0; font-weight: 600; }
   header .sub { font-size: 12px; color: #aeb8d0; margin-top: 2px; }
   .head-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .btn-link { color: #fff; background: var(--accent); text-decoration: none; padding: 7px 14px; font-size: 13px; font-weight: 600; border-radius: 8px; white-space: nowrap; }
-  .btn-link:active { filter: brightness(.92); }
   .btn-ghost { background: transparent; color: #cdd5e6; border: 1px solid #45527a; padding: 7px 14px; font-size: 13px; border-radius: 8px; cursor: pointer; }
   .wrap { max-width: 760px; margin: 0 auto; padding: 20px 16px 60px; }
-
   .app-tag { display: inline-block; font-size: 12px; font-weight: 700; color: var(--accent); background: #fbf1e3; border-radius: 6px; padding: 4px 10px; margin-bottom: 10px; }
   .count { font-size: 13px; color: var(--muted); margin: 0 0 16px; }
   .sec-gap { margin-top: 34px; }
-
   #loginView { max-width: 380px; margin: 60px auto; padding: 0 16px; }
   .login-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 28px 24px; }
   .login-card h2 { margin: 0 0 4px; font-size: 18px; }
   .login-card p { margin: 0 0 20px; font-size: 13px; color: var(--muted); }
   label { display: block; font-size: 12px; color: var(--muted); margin: 12px 0 5px; font-weight: 600; }
   input { width: 100%; padding: 10px 12px; font-size: 15px; border: 1px solid var(--line); border-radius: 8px; background: #fff; -webkit-appearance: none; }
-  input:focus { outline: 2px solid var(--navy-soft); outline-offset: -1px; border-color: var(--navy-soft); }
-  button { font-family: inherit; cursor: pointer; border: none; border-radius: 8px; font-weight: 600; transition: filter .12s; }
-  button:active { filter: brightness(.92); }
+  input:focus { outline: 2px solid var(--navy-soft); outline-offset: -1px; }
+  button { font-family: inherit; cursor: pointer; border: none; border-radius: 8px; font-weight: 600; }
   .btn-primary { background: var(--navy); color: #fff; padding: 11px 16px; width: 100%; font-size: 15px; margin-top: 18px; }
-
   .user-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
   .user-head { display: flex; align-items: center; justify-content: space-between; padding: 13px 16px; gap: 10px; }
   .user-name { font-weight: 700; font-size: 15px; word-break: break-all; }
   .user-mail { font-size: 12px; color: var(--muted); word-break: break-all; }
   .badge { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
-  .badge-active  { background: var(--active-bg);  color: var(--active); }
-  .badge-trial   { background: var(--trial-bg);   color: var(--trial); }
+  .badge-active { background: var(--active-bg); color: var(--active); }
+  .badge-trial { background: var(--trial-bg); color: var(--trial); }
   .badge-expired { background: var(--expired-bg); color: var(--expired); }
-
   .user-body { padding: 0 16px 14px; }
   .seg { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
   .seg button { flex: 1; min-width: 90px; padding: 9px 8px; font-size: 13px; border: 1px solid var(--line); background: #f7f8fb; color: var(--muted); border-radius: 8px; }
-  .seg button.sel-active  { background: var(--active);  color: #fff; border-color: var(--active); }
-  .seg button.sel-trial   { background: var(--trial);   color: #fff; border-color: var(--trial); }
+  .seg button.sel-active { background: var(--active); color: #fff; border-color: var(--active); }
+  .seg button.sel-trial { background: var(--trial); color: #fff; border-color: var(--trial); }
   .seg button.sel-expired { background: var(--expired); color: #fff; border-color: var(--expired); }
   .trial-row { display: none; margin-bottom: 10px; }
   .trial-row.show { display: block; }
@@ -73,7 +58,6 @@
   .saved-note.show { opacity: 1; }
   .saved-note.err { color: var(--expired); }
   .meta { font-size: 11px; color: var(--muted); margin-top: 8px; }
-
   .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--ink); color: #fff; padding: 11px 18px; border-radius: 8px; font-size: 14px; opacity: 0; pointer-events: none; transition: all .25s; z-index: 50; max-width: 90%; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   .toast.err { background: var(--expired); }
@@ -93,7 +77,7 @@
     <label for="email">メールアドレス</label>
     <input id="email" type="email" autocomplete="username" placeholder="tamulab.jp@gmail.com">
     <label for="password">パスワード</label>
-    <input id="password" type="password" autocomplete="current-password" placeholder="••••••••">
+    <input id="password" type="password" autocomplete="current-password">
     <button class="btn-primary" id="loginBtn">ログイン</button>
   </div>
 </div>
@@ -112,11 +96,9 @@
   </header>
   <div class="wrap">
     <div id="notAdmin" class="err-box hidden">このアカウントは管理者ではありません（表示のみ）。</div>
-
     <div class="app-tag">ドラメモ（dm）</div>
     <div class="count" id="count-dm"></div>
     <div id="userList-dm"><div class="loading">読み込み中…</div></div>
-
     <div class="app-tag sec-gap">プロジェクト付箋（pm）</div>
     <div class="count" id="count-pm"></div>
     <div id="userList-pm"><div class="loading">読み込み中…</div></div>
@@ -131,22 +113,22 @@ const SUPABASE_URL = 'https://hyvjvcdahahrznhujtaz.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh5dmp2Y2RhaGFocnpuaHVqdGF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NTE3MDcsImV4cCI6MjA5NTQyNzcwN30.Zdl8yaFH64xEbiEzi7v8dsd2iu3CKaH96TBNqigJZV4';
 const SUPERADMIN_UID = '70e678b4-39db-49cc-a715-1ba5876cb892';
 
-// アプリごとの設定（dm＝ドラメモ / pm＝プロジェクト付箋）
+// requireName: true = 名前ありのみ表示（ドラメモ）／ false = 名前が空でも表示（付箋）
 const APP_CONF = {
-  dm: { table: 'dm_user_profiles', rpc: 'dm_admin_set_user_status', listId: 'userList-dm', countId: 'count-dm' },
-  pm: { table: 'pm_user_profiles', rpc: 'pm_admin_set_user_status', listId: 'userList-pm', countId: 'count-pm' },
+  dm: { table: 'dm_user_profiles', rpc: 'dm_admin_set_user_status', listId: 'userList-dm', countId: 'count-dm', requireName: true },
+  pm: { table: 'pm_user_profiles', rpc: 'pm_admin_set_user_status', listId: 'userList-pm', countId: 'count-pm', requireName: false }
 };
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-const $ = (id) => document.getElementById(id);
+const $ = function(id) { return document.getElementById(id); };
 
 (async function init() {
-  const { data } = await sb.auth.getSession();
-  if (data.session) showAdmin(data.session.user);
+  const r = await sb.auth.getSession();
+  if (r.data.session) showAdmin(r.data.session.user);
 })();
 
 $('loginBtn').addEventListener('click', login);
-$('password').addEventListener('keydown', (e) => { if (e.key === 'Enter') login(); });
+$('password').addEventListener('keydown', function(e) { if (e.key === 'Enter') login(); });
 
 async function login() {
   const email = $('email').value.trim();
@@ -154,14 +136,14 @@ async function login() {
   $('loginErr').classList.add('hidden');
   if (!email || !password) { showLoginErr('メールアドレスとパスワードを入力してください。'); return; }
   $('loginBtn').textContent = 'ログイン中…'; $('loginBtn').disabled = true;
-  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  const res = await sb.auth.signInWithPassword({ email: email, password: password });
   $('loginBtn').textContent = 'ログイン'; $('loginBtn').disabled = false;
-  if (error) { showLoginErr('ログインに失敗しました。メールアドレスかパスワードをご確認ください。'); return; }
-  showAdmin(data.user);
+  if (res.error) { showLoginErr('ログインに失敗しました。メールアドレスかパスワードをご確認ください。'); return; }
+  showAdmin(res.data.user);
 }
 function showLoginErr(msg) { $('loginErr').textContent = msg; $('loginErr').classList.remove('hidden'); }
 
-$('logoutBtn').addEventListener('click', async () => { await sb.auth.signOut(); location.reload(); });
+$('logoutBtn').addEventListener('click', async function() { await sb.auth.signOut(); location.reload(); });
 
 async function showAdmin(user) {
   $('loginView').classList.add('hidden');
@@ -175,11 +157,11 @@ async function showAdmin(user) {
 
 async function loadUsers(app, isAdmin) {
   const conf = APP_CONF[app];
-  const { data, error } = await sb
-    .from(conf.table)
-    .select('id, name, email, status, trial_ends_at, created_at')
-    .not('name', 'is', null)
-    .order('created_at', { ascending: true });
+  let query = sb.from(conf.table).select('id, name, email, status, trial_ends_at, created_at');
+  if (conf.requireName) { query = query.not('name', 'is', null); }
+  const res = await query.order('created_at', { ascending: true });
+  const data = res.data;
+  const error = res.error;
 
   if (error) {
     $(conf.listId).innerHTML = '<div class="err-box">読み込みに失敗しました：' + esc(error.message) + '</div>';
@@ -192,57 +174,54 @@ async function loadUsers(app, isAdmin) {
     return;
   }
   const c = { active: 0, trial: 0, expired: 0 };
-  data.forEach(u => { c[u.status] = (c[u.status] || 0) + 1; });
+  data.forEach(function(u) { c[u.status] = (c[u.status] || 0) + 1; });
   $(conf.countId).textContent = 'ユーザー ' + data.length + ' 人（有効 ' + (c.active||0) + ' / お試し ' + (c.trial||0) + ' / 停止 ' + (c.expired||0) + '）';
   $(conf.listId).innerHTML = '';
-  data.forEach(u => $(conf.listId).appendChild(buildCard(app, u, isAdmin)));
+  data.forEach(function(u) { $(conf.listId).appendChild(buildCard(app, u, isAdmin)); });
 }
 
 function buildCard(app, u, isAdmin) {
   const card = document.createElement('div');
   card.className = 'user-card';
   const st = u.status || 'active';
-  const badge =
-    st === 'active'  ? '<span class="badge badge-active">有効</span>' :
-    st === 'trial'   ? '<span class="badge badge-trial">お試し中</span>' :
-                       '<span class="badge badge-expired">停止</span>';
+  let badge;
+  if (st === 'active') { badge = '<span class="badge badge-active">有効</span>'; }
+  else if (st === 'trial') { badge = '<span class="badge badge-trial">お試し中</span>'; }
+  else { badge = '<span class="badge badge-expired">停止</span>'; }
 
-  card.innerHTML =
-    '<div class="user-head">' +
-      '<div>' +
-        '<div class="user-name">' + esc(u.name || '(名前未設定)') + '</div>' +
-        '<div class="user-mail">' + esc(u.email || '') + '</div>' +
-      '</div>' +
-      '<div>' + badge + '</div>' +
-    '</div>' +
-    '<div class="user-body">' +
-      (isAdmin ?
-        '<div class="seg" data-seg>' +
-          '<button data-v="active" class="' + (st==='active'?'sel-active':'') + '">有効</button>' +
-          '<button data-v="trial" class="' + (st==='trial'?'sel-trial':'') + '">お試し</button>' +
-          '<button data-v="expired" class="' + (st==='expired'?'sel-expired':'') + '">停止</button>' +
-        '</div>' +
-        '<div class="trial-row ' + (st==='trial'?'show':'') + '" data-trialrow>' +
-          '<label>お試し期限</label>' +
-          '<input type="date" data-trial value="' + dateInput(u.trial_ends_at) + '">' +
-        '</div>' +
-        '<div class="row-actions">' +
-          '<button class="btn-save" data-save>保存</button>' +
-          '<span class="saved-note" data-note></span>' +
-        '</div>'
-      : '') +
-      '<div class="meta">お試し期限：' + (u.trial_ends_at ? fmtDate(u.trial_ends_at) : '—') + '</div>' +
-    '</div>';
+  const displayName = u.name || u.email || '(名前未設定)';
+  const subLine = u.name ? (u.email || '') : '';
+
+  let inner = '<div class="user-head"><div>';
+  inner += '<div class="user-name">' + esc(displayName) + '</div>';
+  if (subLine) { inner += '<div class="user-mail">' + esc(subLine) + '</div>'; }
+  inner += '</div><div>' + badge + '</div></div>';
+  inner += '<div class="user-body">';
+  if (isAdmin) {
+    inner += '<div class="seg" data-seg>';
+    inner += '<button data-v="active" class="' + (st==='active'?'sel-active':'') + '">有効</button>';
+    inner += '<button data-v="trial" class="' + (st==='trial'?'sel-trial':'') + '">お試し</button>';
+    inner += '<button data-v="expired" class="' + (st==='expired'?'sel-expired':'') + '">停止</button>';
+    inner += '</div>';
+    inner += '<div class="trial-row ' + (st==='trial'?'show':'') + '" data-trialrow>';
+    inner += '<label>お試し期限</label>';
+    inner += '<input type="date" data-trial value="' + dateInput(u.trial_ends_at) + '">';
+    inner += '</div>';
+    inner += '<div class="row-actions"><button class="btn-save" data-save>保存</button><span class="saved-note" data-note></span></div>';
+  }
+  inner += '<div class="meta">お試し期限：' + (u.trial_ends_at ? fmtDate(u.trial_ends_at) : '—') + '</div>';
+  inner += '</div>';
+  card.innerHTML = inner;
 
   if (isAdmin) {
     let selected = st;
     const seg = card.querySelector('[data-seg]');
     const trialRow = card.querySelector('[data-trialrow]');
     const trialInput = card.querySelector('[data-trial]');
-    seg.querySelectorAll('button').forEach(b => {
-      b.addEventListener('click', () => {
+    seg.querySelectorAll('button').forEach(function(b) {
+      b.addEventListener('click', function() {
         selected = b.dataset.v;
-        seg.querySelectorAll('button').forEach(x => x.className = '');
+        seg.querySelectorAll('button').forEach(function(x) { x.className = ''; });
         b.className = 'sel-' + selected;
         trialRow.classList.toggle('show', selected === 'trial');
         if (selected === 'trial' && !trialInput.value) {
@@ -251,7 +230,9 @@ function buildCard(app, u, isAdmin) {
         }
       });
     });
-    card.querySelector('[data-save]').addEventListener('click', () => saveUser(app, u.id, u.name, () => selected, trialInput, card));
+    card.querySelector('[data-save]').addEventListener('click', function() {
+      saveUser(app, u.id, displayName, function() { return selected; }, trialInput, card);
+    });
   }
   return card;
 }
@@ -265,41 +246,40 @@ async function saveUser(app, userId, userName, getSelected, trialInput, card) {
     if (!trialInput.value) { flashNote(note, 'お試し期限を入れてください', true); return; }
     trialEnds = new Date(trialInput.value + 'T23:59:59').toISOString();
   }
-
   const btn = card.querySelector('[data-save]');
   btn.disabled = true; btn.textContent = '保存中…';
 
-  const { error } = await sb.rpc(conf.rpc, {
-    p_user_id: userId,
-    p_status: status,
-    p_trial_ends: trialEnds,
-  });
+  const res = await sb.rpc(conf.rpc, { p_user_id: userId, p_status: status, p_trial_ends: trialEnds });
 
   btn.disabled = false; btn.textContent = '保存';
-  if (error) {
-    const msg = /superadmin/.test(error.message) ? '管理者権限がありません' : '保存に失敗：' + error.message;
+  if (res.error) {
+    const msg = /superadmin/.test(res.error.message) ? '管理者権限がありません' : '保存に失敗：' + res.error.message;
     flashNote(note, msg, true); toast(msg, true); return;
   }
   flashNote(note, '保存しました');
   toast((userName || 'ユーザー') + ' を更新しました');
-  const { data } = await sb.auth.getSession();
-  await loadUsers(app, data.session && data.session.user.id === SUPERADMIN_UID);
+  const s = await sb.auth.getSession();
+  await loadUsers(app, s.data.session && s.data.session.user.id === SUPERADMIN_UID);
 }
 
 function flashNote(el, msg, isErr) {
   el.textContent = msg; el.classList.toggle('err', !!isErr); el.classList.add('show');
-  clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 2600);
+  clearTimeout(el._t); el._t = setTimeout(function() { el.classList.remove('show'); }, 2600);
 }
 let toastT;
 function toast(msg, isErr) {
   const t = $('toast'); t.textContent = msg; t.classList.toggle('err', !!isErr); t.classList.add('show');
-  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2600);
+  clearTimeout(toastT); toastT = setTimeout(function() { t.classList.remove('show'); }, 2600);
 }
-function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) { return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]; }); }
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+    return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+  });
+}
 function fmtDate(s) {
   if (!s) return '—';
   const d = new Date(s); if (isNaN(d)) return esc(s);
-  const p = n => String(n).padStart(2, '0');
+  const p = function(n) { return String(n).padStart(2, '0'); };
   return d.getFullYear() + '/' + p(d.getMonth()+1) + '/' + p(d.getDate());
 }
 function dateInput(s) {
