@@ -70,10 +70,19 @@
   .badge { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
   .badge-free { background: #eef0f4; color: var(--free); }
   .badge-paid { background: var(--paid-bg); color: var(--paid); }
+  .badge-active { background: var(--paid-bg); color: var(--paid); }
+  .badge-trial { background: #fbf1e3; color: var(--accent); }
+  .badge-suspended { background: var(--off-bg); color: var(--off); }
 
   .co-body { padding: 14px 16px; }
   .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .field label { margin-top: 0; }
+  .field.full { grid-column: 1 / -1; }
+  select {
+    width: 100%; padding: 10px 12px; font-size: 14px;
+    border: 1px solid var(--line); border-radius: 8px; background: #fff; -webkit-appearance: none;
+  }
+  select:focus { outline: 2px solid var(--navy-soft); outline-offset: -1px; border-color: var(--navy-soft); }
   .row-actions { display: flex; align-items: center; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
   .btn-save { background: var(--paid); color: #fff; padding: 9px 18px; font-size: 14px; }
   .saved-note { font-size: 12px; color: var(--paid); margin-left: auto; opacity: 0; transition: opacity .2s; }
@@ -191,15 +200,15 @@ async function showAdmin(user) {
 
 // app: 'tc' or 'tk'
 const APP_CONF = {
-  tc: { table: 'tc_companies', rpc: 'admin_set_company_plan',    listId: 'coList-tc', countId: 'count-tc' },
-  tk: { table: 'tk_companies', rpc: 'tk_admin_set_company_plan', listId: 'coList-tk', countId: 'count-tk' },
+  tc: { table: 'tc_companies', rpc: 'admin_set_company_plan',    statusRpc: 'admin_set_company_status',    listId: 'coList-tc', countId: 'count-tc' },
+  tk: { table: 'tk_companies', rpc: 'tk_admin_set_company_plan', statusRpc: 'tk_admin_set_company_status', listId: 'coList-tk', countId: 'count-tk' },
 };
 
 async function loadCompanies(app, isAdmin) {
   const conf = APP_CONF[app];
   const { data, error } = await sb
     .from(conf.table)
-    .select('id, name, company_code, plan, price, employee_limit, updated_at')
+    .select('id, name, company_code, plan, price, employee_limit, status, trial_ends_at, updated_at')
     .order('created_at', { ascending: true });
   if (error) {
     $(conf.listId).innerHTML = '<div class="err-box">読み込みに失敗しました：' + esc(error.message) + '</div>';
@@ -212,7 +221,8 @@ async function loadCompanies(app, isAdmin) {
     return;
   }
   const paid = data.filter(c => c.plan === 'paid').length;
-  $(conf.countId).textContent = `登録 ${data.length} 社（有料 ${paid} 社 / 無料 ${data.length - paid} 社）`;
+  const suspended = data.filter(c => c.status === 'suspended').length;
+  $(conf.countId).textContent = `登録 ${data.length} 社（有料 ${paid} 社 / 無料 ${data.length - paid} 社 / 停止中 ${suspended} 社）`;
   $(conf.listId).innerHTML = '';
   data.forEach(c => $(conf.listId).appendChild(buildCard(app, c, isAdmin)));
 }
@@ -221,10 +231,16 @@ function buildCard(app, c, isAdmin) {
   const card = document.createElement('div');
   card.className = 'co-card';
   const isPaid = c.plan === 'paid';
+  const status = c.status || 'active';
 
-  const badge = isPaid
+  const planBadge = isPaid
     ? `<span class="badge badge-paid">有料</span>`
     : `<span class="badge badge-free">無料</span>`;
+
+  const STATUS_LABEL = { active: '稼働中', trial: 'お試し', suspended: '停止中' };
+  const statusBadge = `<span class="badge badge-${esc(status)}">${esc(STATUS_LABEL[status] || status)}</span>`;
+
+  const trialDateVal = toDateInputValue(c.trial_ends_at);
 
   card.innerHTML = `
     <div class="co-head">
@@ -232,7 +248,7 @@ function buildCard(app, c, isAdmin) {
         <div class="co-name">${esc(c.name)}</div>
         <div class="co-code">会社コード：${esc(c.company_code)}</div>
       </div>
-      <div class="badges">${badge}</div>
+      <div class="badges">${statusBadge}${planBadge}</div>
     </div>
     <div class="co-body">
       <div class="grid">
@@ -255,6 +271,18 @@ function buildCard(app, c, isAdmin) {
             <span class="switch-label ${isPaid ? 'switch-on' : 'switch-off'}" data-statelabel>${isPaid ? '有料' : '無料'}</span>
           </label>
         </div>
+        <div class="field">
+          <label>稼働状態</label>
+          <select data-f="status" ${isAdmin ? '' : 'disabled'}>
+            <option value="active" ${status === 'active' ? 'selected' : ''}>稼働中</option>
+            <option value="trial" ${status === 'trial' ? 'selected' : ''}>お試し</option>
+            <option value="suspended" ${status === 'suspended' ? 'selected' : ''}>停止中</option>
+          </select>
+        </div>
+        <div class="field" data-trial-field ${status === 'trial' ? '' : 'style="display:none"'}>
+          <label>お試し期限</label>
+          <input data-f="trial_ends" type="date" value="${trialDateVal}" ${isAdmin ? '' : 'disabled'}>
+        </div>
       </div>
       ${isAdmin ? `
       <div class="row-actions">
@@ -274,6 +302,13 @@ function buildCard(app, c, isAdmin) {
       stateLabel.classList.toggle('switch-on', on);
       stateLabel.classList.toggle('switch-off', !on);
     });
+
+    const statusSel = card.querySelector('[data-f="status"]');
+    const trialField = card.querySelector('[data-trial-field]');
+    statusSel.addEventListener('change', () => {
+      trialField.style.display = statusSel.value === 'trial' ? '' : 'none';
+    });
+
     card.querySelector('[data-save]').addEventListener('click', () => saveCompany(app, c.id, c.name, card));
   }
   return card;
@@ -284,29 +319,51 @@ async function saveCompany(app, companyId, companyName, card) {
   const paid = card.querySelector('[data-f="paid"]').checked;
   const priceRaw = card.querySelector('[data-f="price"]').value.trim();
   const limitRaw = card.querySelector('[data-f="limit"]').value.trim();
+  const status = card.querySelector('[data-f="status"]').value;
+  const trialRaw = card.querySelector('[data-f="trial_ends"]').value;
   const note = card.querySelector('[data-note]');
 
   const price = priceRaw === '' ? 0 : Number(priceRaw);
   const limit = limitRaw === '' ? null : Number(limitRaw);
   if (priceRaw !== '' && isNaN(price)) { flashNote(note, '料金が数値ではありません', true); return; }
   if (limitRaw !== '' && isNaN(limit)) { flashNote(note, '人数が数値ではありません', true); return; }
+  if (status === 'trial' && !trialRaw) { flashNote(note, 'お試し期限を入力してください', true); return; }
+
+  let trialEndsIso = null;
+  if (trialRaw) {
+    const d = new Date(trialRaw + 'T23:59:59');
+    if (!isNaN(d)) trialEndsIso = d.toISOString();
+  }
 
   const btn = card.querySelector('[data-save]');
   btn.disabled = true; btn.textContent = '保存中…';
 
-  const { error } = await sb.rpc(conf.rpc, {
+  const { error: planError } = await sb.rpc(conf.rpc, {
     p_company_id: companyId,
     p_plan: paid ? 'paid' : 'free',
     p_price: price,
     p_limit: limit,
   });
 
-  btn.disabled = false; btn.textContent = '保存';
-
-  if (error) {
-    const msg = /superadmin/.test(error.message) ? '管理者権限がありません' : '保存に失敗：' + error.message;
+  if (planError) {
+    btn.disabled = false; btn.textContent = '保存';
+    const msg = /superadmin/.test(planError.message) ? '管理者権限がありません' : '保存に失敗：' + planError.message;
     flashNote(note, msg, true); toast(msg, true); return;
   }
+
+  const { error: statusError } = await sb.rpc(conf.statusRpc, {
+    p_company_id: companyId,
+    p_status: status,
+    p_trial_ends: trialEndsIso,
+  });
+
+  btn.disabled = false; btn.textContent = '保存';
+
+  if (statusError) {
+    const msg = /superadmin/.test(statusError.message) ? '管理者権限がありません' : '稼働状態の保存に失敗：' + statusError.message;
+    flashNote(note, msg, true); toast(msg, true); return;
+  }
+
   flashNote(note, '保存しました');
   toast(`${companyName} を更新しました`);
   const { data } = await sb.auth.getSession();
@@ -325,6 +382,13 @@ function toast(msg, isErr) {
 }
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
 function numv(v) { return (v === null || v === undefined || v === '') ? '' : Number(v); }
+function toDateInputValue(s) {
+  if (!s) return '';
+  const d = new Date(s);
+  if (isNaN(d)) return '';
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
+}
 function fmtDate(s) {
   if (!s) return '—';
   const d = new Date(s); if (isNaN(d)) return esc(s);
